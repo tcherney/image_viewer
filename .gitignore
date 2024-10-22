@@ -1,0 +1,10 @@
+/zig-cache/
+/zig-out/
+/answers/
+/patches/healed/
+/output/
+/.zig-cache/
+*.txt
+*.png
+*.jpg
+*.bmp
