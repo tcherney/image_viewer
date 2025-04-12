@@ -5,7 +5,7 @@ const graphics = @import("graphics");
 
 pub const Error = error{} || graphics.Error || term.Error || image.Error;
 
-pub const std_options = .{
+pub const std_options: std.Options = .{
     .log_level = .err,
     .logFn = myLogFn,
     .log_scope_levels = &[_]std.log.ScopeLevel{
@@ -19,7 +19,7 @@ pub const std_options = .{
 
 pub fn myLogFn(
     comptime level: std.log.Level,
-    comptime scope: @TypeOf(.EnumLiteral),
+    comptime scope: @TypeOf(.enum_literal),
     comptime format: []const u8,
     args: anytype,
 ) void {
@@ -32,7 +32,7 @@ pub fn myLogFn(
 }
 
 pub fn render_img(comptime img_type: type, img: *image.Image(img_type), allocator: std.mem.Allocator) Error!void {
-    var g: graphics.Graphics(.color_true) = try graphics.Graphics(.color_true).init(allocator);
+    var g: graphics.Graphics(._2d, .color_true) = try graphics.Graphics(._2d, .color_true).init(allocator);
     const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
     const height = @as(u32, @intCast(g.terminal.size.height));
     const width = @as(u32, @intFromFloat(@as(f32, @floatFromInt(g.terminal.size.height)) * ratio));
