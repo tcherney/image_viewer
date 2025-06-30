@@ -3,6 +3,8 @@ const image = @import("image");
 const term = @import("term");
 const graphics = @import("graphics");
 
+//TODO incorporate changes from zigxel and image libraries
+
 pub const Error = error{} || graphics.Error || term.Error || image.Error;
 
 pub const std_options: std.Options = .{
