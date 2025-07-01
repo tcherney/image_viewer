@@ -1,11 +1,13 @@
 const std = @import("std");
 const image = @import("image");
 const term = @import("term");
-const graphics = @import("graphics");
+const engine = @import("engine");
 
 //TODO incorporate changes from zigxel and image libraries
+pub const Image = image.Image;
+pub const Graphics = engine.Graphics;
 
-pub const Error = error{} || graphics.Error || term.Error || image.Error;
+pub const Error = error{} || engine.Error || term.Error || Image.Error;
 
 pub const std_options: std.Options = .{
     .log_level = .err,
@@ -33,18 +35,18 @@ pub fn myLogFn(
     nosuspend stderr.print(prefix ++ format, args) catch return;
 }
 
-pub fn render_img(comptime img_type: type, img: *image.Image(img_type), allocator: std.mem.Allocator) Error!void {
-    var g: graphics.Graphics(._2d, .color_true) = try graphics.Graphics(._2d, .color_true).init(allocator);
+pub fn render_img(img: *Image, allocator: std.mem.Allocator) Error!void {
+    var g: Graphics = try Graphics.init(allocator, .pixel, ._2d, .color_true);
     const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
-    const height = @as(u32, @intCast(g.terminal.size.height));
-    const width = @as(u32, @intFromFloat(@as(f32, @floatFromInt(g.terminal.size.height)) * ratio));
+    const height = @as(u32, @intCast(g.pixel.terminal.size.height));
+    const width = @as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.terminal.size.height)) * ratio));
     std.log.info("width {d}, height {d}, width {d}, height {d} \n", .{ img.width, img.height, width, height });
-    const pixels = try img.image_core().bilinear(width, height);
+    const pixels = try image.image_core.bilinear(allocator, img.data.items, img.width, img.height, width, height);
     defer allocator.free(pixels);
-    g.first_render = false;
-    try g.draw_pixel_buffer(pixels, width, height, .{ .x = 0, .y = 0, .width = width, .height = height }, .{ .x = 0, .y = 0, .width = width, .height = height }, null);
-    try g.flip(null, null);
-    _ = try g.terminal.stdin.readByte();
+    g.pixel.first_render = false;
+    try g.pixel.draw_pixel_buffer(pixels, width, height, .{ .x = 0, .y = 0, .width = width, .height = height }, .{ .x = 0, .y = 0, .width = width, .height = height }, null);
+    try g.pixel.flip(null, null);
+    _ = try g.pixel.terminal.stdin.readByte();
     try g.deinit();
 }
 
@@ -64,19 +66,16 @@ pub fn main() !void {
             } else {
                 const extension = argsv[1][argsv[1].len - 3 ..];
                 if (std.mem.eql(u8, extension, "jpg")) {
-                    var im = image.Image(image.JPEGImage){};
-                    try im.load(argsv[1], allocator);
-                    try render_img(image.JPEGImage, &im, allocator);
+                    var im = try Image.init_load(allocator, argsv[1], .JPEG);
+                    try render_img(&im, allocator);
                     im.deinit();
                 } else if (std.mem.eql(u8, extension, "bmp")) {
-                    var im = image.Image(image.BMPImage){};
-                    try im.load(argsv[1], allocator);
-                    try render_img(image.BMPImage, &im, allocator);
+                    var im = try Image.init_load(allocator, argsv[1], .BMP);
+                    try render_img(&im, allocator);
                     im.deinit();
                 } else if (std.mem.eql(u8, extension, "png")) {
-                    var im = image.Image(image.PNGImage){};
-                    try im.load(argsv[1], allocator);
-                    try render_img(image.PNGImage, &im, allocator);
+                    var im = try Image.init_load(allocator, argsv[1], .PNG);
+                    try render_img(&im, allocator);
                     im.deinit();
                 } else {
                     try stdout.print("Image must be .jpg/.png/.bmp\n", .{});

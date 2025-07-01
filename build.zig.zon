@@ -59,8 +59,11 @@
         .terminal = .{
             .path = "../terminal",
         },
-        .graphicslib = .{
+        .engine = .{
             .path = "../zigxel",
+        },
+        .common = .{
+            .path = "../common",
         },
     },
 
