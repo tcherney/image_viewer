@@ -15,32 +15,36 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = std.builtin.OptimizeMode.ReleaseFast;
 
-    const exe = b.addExecutable(.{
-        .name = "image_viewer",
+    const exe_mod = b.createModule(.{
+        // `root_source_file` is the Zig "entry point" of the module. If a module
+        // only contains e.g. external object files, you can make this `null`.
+        // In this case the main source file is merely a path, however, in more
+        // complicated build scripts, this could be a generated file.
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
 
-    const imglib = b.dependency("imglib", .{
-        .target = target,
-        .optimize = optimize,
+    // This creates another `std.Build.Step.Compile`, but this one builds an executable
+    // rather than a static library.
+    const exe = b.addExecutable(.{
+        .name = "image_viewer",
+        .root_module = exe_mod,
     });
+    const imglib = b.dependency("imglib", .{});
     exe.root_module.addImport("image", imglib.module("image"));
-
-    const termlib = b.dependency("terminal", .{
-        .target = target,
-        .optimize = optimize,
-    });
+    const termlib = b.dependency("terminal", .{});
     exe.root_module.addImport("term", termlib.module("term"));
+    const commonlib = b.dependency("common", .{});
+    exe.root_module.addImport("common", commonlib.module("common"));
+    const zigxel_lib = b.dependency("engine", .{});
+    zigxel_lib.module("engine").addImport("image", imglib.module("image"));
+    zigxel_lib.module("engine").addImport("term", termlib.module("term"));
+    zigxel_lib.module("engine").addImport("common", commonlib.module("common"));
+    exe.root_module.addImport("engine", zigxel_lib.module("engine"));
+    exe.linkLibC();
 
-    const graphicslib = b.dependency("graphicslib", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    graphicslib.module("graphics").addImport("term", termlib.module("term"));
-    graphicslib.module("graphics").addImport("image", imglib.module("image"));
-    exe.root_module.addImport("graphics", graphicslib.module("graphics"));
+    exe.linkLibrary(zigxel_lib.artifact("libzigxel"));
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
