@@ -37,6 +37,9 @@ pub fn myLogFn(
 }
 
 export fn render_img(name: [*:0]const u8, len: usize) usize {
+    const stdout_file = std.io.getStdOut().writer();
+    var bw = std.io.bufferedWriter(stdout_file);
+    const stdout = bw.writer();
     const name_slice: []const u8 = name[0..len];
     const extension: []const u8 = name_slice[len - 3 ..];
     var img: Image = undefined;
@@ -53,7 +56,12 @@ export fn render_img(name: [*:0]const u8, len: usize) usize {
             return 1;
         };
     } else {
-        std.log.info("Image must be .jpg/.png/.bmp\n", .{});
+        stdout.print("Image must be .jpg/.png/.bmp\n", .{}) catch {
+            return 1;
+        };
+        bw.flush() catch {
+            return 1;
+        };
     }
     defer img.deinit();
     var g: Graphics = Graphics.init(allocator, .pixel, ._2d, .color_true, .wasm) catch {
