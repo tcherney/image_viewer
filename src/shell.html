@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Zig WASM</title>
+    <title>image_viewer</title>
     <link rel="stylesheet" href="xterm/xterm.css" />
     <script src="xterm/xterm.js"></script>
     <style>
@@ -166,8 +166,9 @@
       var progressElement = document.getElementById("progress");
       var spinnerElement = document.getElementById("spinner");
       var term = new Terminal({
-        cols: 150,
-        rows: 35,
+        cols: 600,
+        rows: 150,
+        fontSize: 4,
         scrollOnUserInput: false,
       });
       let reader = new FileReader();

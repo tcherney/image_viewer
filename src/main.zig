@@ -57,7 +57,7 @@ export fn render_img(name: [*:0]const u8, len: usize) usize {
 pub fn render(name: []const u8) Error!void {
     const extension: []const u8 = name[name.len - 3 ..];
     var img: Image = undefined;
-    if (std.mem.eql(u8, extension, "jpg")) {
+    if (std.mem.eql(u8, extension, "jpg") or std.mem.eql(u8, name[name.len - 4 ..], "jpeg")) {
         img = try Image.init_load(allocator, name, .JPEG);
     } else if (std.mem.eql(u8, extension, "bmp")) {
         img = try Image.init_load(allocator, name, .BMP);
@@ -68,6 +68,9 @@ pub fn render(name: []const u8) Error!void {
     }
     defer img.deinit();
     var g: Graphics = try Graphics.init(allocator, .pixel, ._2d, .color_true, .wasm);
+    if (builtin.os.tag == .emscripten) {
+        try g.pixel.size_change(.{ .width = 600, .height = 150 });
+    }
     const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
     const height = @as(u32, @intCast(g.pixel.pixel_height));
     const width = @as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.pixel_height)) * ratio));
