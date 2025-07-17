@@ -4,7 +4,6 @@ const image = @import("image");
 const term = @import("term");
 const engine = @import("engine");
 
-//TODO incorporate changes from zigxel and image libraries
 pub const Image = image.Image;
 pub const Graphics = engine.Graphics;
 
@@ -19,6 +18,7 @@ pub const std_options: std.Options = .{
         .{ .scope = .bmp_image, .level = .err },
         .{ .scope = .texture, .level = .err },
         .{ .scope = .graphics, .level = .err },
+        .{ .scope = .image_viewer, .level = .err },
     },
 };
 
@@ -36,60 +36,50 @@ pub fn myLogFn(
     nosuspend stderr.print(prefix ++ format, args) catch return;
 }
 
+const IMAGEVIEWER_LOG = std.log.scoped(.image_viewer);
+
 export fn render_img(name: [*:0]const u8, len: usize) usize {
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
     const name_slice: []const u8 = name[0..len];
-    const extension: []const u8 = name_slice[len - 3 ..];
+    var ret: usize = 0;
+    render(name_slice) catch |err| {
+        const stdout_file = std.io.getStdOut().writer();
+        var bw = std.io.bufferedWriter(stdout_file);
+        const stdout = bw.writer();
+        stdout.print("Error occured: {any}\n", .{err}) catch {
+            return 1;
+        };
+        ret = 1;
+    };
+
+    return 0;
+}
+
+pub fn render(name: []const u8) Error!void {
+    const extension: []const u8 = name[name.len - 3 ..];
     var img: Image = undefined;
     if (std.mem.eql(u8, extension, "jpg")) {
-        img = Image.init_load(allocator, name_slice, .JPEG) catch {
-            return 1;
-        };
+        img = try Image.init_load(allocator, name, .JPEG);
     } else if (std.mem.eql(u8, extension, "bmp")) {
-        img = Image.init_load(allocator, name_slice, .BMP) catch {
-            return 1;
-        };
+        img = try Image.init_load(allocator, name, .BMP);
     } else if (std.mem.eql(u8, extension, "png")) {
-        img = Image.init_load(allocator, name_slice, .PNG) catch {
-            return 1;
-        };
+        img = try Image.init_load(allocator, name, .PNG);
     } else {
-        stdout.print("Image must be .jpg/.png/.bmp\n", .{}) catch {
-            return 1;
-        };
-        bw.flush() catch {
-            return 1;
-        };
+        IMAGEVIEWER_LOG.err("Image must be .jpg/.png/.bmp\n", .{});
     }
     defer img.deinit();
-    var g: Graphics = Graphics.init(allocator, .pixel, ._2d, .color_true, .wasm) catch {
-        return 1;
-    };
+    var g: Graphics = try Graphics.init(allocator, .pixel, ._2d, .color_true, .wasm);
     const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
     const height = @as(u32, @intCast(g.pixel.pixel_height));
     const width = @as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.pixel_height)) * ratio));
-    const pixels = image.image_core.bilinear(allocator, img.data.items, img.width, img.height, width, height) catch {
-        return 1;
-    };
+    const pixels = try image.image_core.bilinear(allocator, img.data.items, img.width, img.height, width, height);
     defer allocator.free(pixels);
     g.pixel.first_render = false;
-    g.pixel.draw_pixel_buffer(pixels, width, height, .{ .x = 0, .y = 0, .width = width, .height = height }, .{ .x = 0, .y = 0, .width = width, .height = height }, null) catch {
-        return 1;
-    };
-    g.pixel.flip(null, null) catch {
-        return 1;
-    };
+    try g.pixel.draw_pixel_buffer(pixels, width, height, .{ .x = 0, .y = 0, .width = width, .height = height }, .{ .x = 0, .y = 0, .width = width, .height = height }, null);
+    try g.pixel.flip(null, null);
     if (builtin.os.tag != .emscripten) {
-        _ = g.pixel.terminal.stdin.readByte() catch {
-            return 1;
-        };
+        _ = try g.pixel.terminal.stdin.readByte();
     }
-    g.deinit() catch {
-        return 1;
-    };
-    return 0;
+    try g.deinit();
 }
 
 pub fn main() !void {
@@ -117,6 +107,6 @@ pub fn main() !void {
     std.process.argsFree(allocator, argsv);
 
     if (builtin.os.tag != .emscripten and gpa.deinit() == .leak) {
-        std.log.warn("Leaked!\n", .{});
+        IMAGEVIEWER_LOG.warn("Leaked!\n", .{});
     }
 }
