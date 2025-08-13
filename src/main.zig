@@ -7,7 +7,7 @@ const engine = @import("engine");
 pub const Image = image.Image;
 pub const Graphics = engine.Graphics;
 
-pub const Error = error{} || engine.Error || term.Error || Image.Error;
+pub const Error = error{BadFileExt} || engine.Error || term.Error || Image.Error;
 var allocator: std.mem.Allocator = undefined;
 pub const std_options: std.Options = .{
     .log_level = .err,
@@ -65,6 +65,7 @@ pub fn render(name: []const u8) Error!void {
         img = try Image.init_load(allocator, name, .PNG);
     } else {
         IMAGEVIEWER_LOG.err("Image must be .jpg/.png/.bmp\n", .{});
+        return Error.BadFileExt;
     }
     defer img.deinit();
     var g: Graphics = try Graphics.init(allocator, .pixel, ._2d, .color_true, .wasm);
