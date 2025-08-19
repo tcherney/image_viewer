@@ -68,10 +68,8 @@ pub fn render(name: []const u8) Error!void {
         return Error.BadFileExt;
     }
     defer img.deinit();
+    engine.set_wasm_terminal_size(150, 600);
     var g: Graphics = try Graphics.init(allocator, .pixel, ._2d, .color_true, .wasm);
-    if (builtin.os.tag == .emscripten) {
-        try g.pixel.size_change(.{ .width = 600, .height = 150 });
-    }
     const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
     const height = @as(u32, @intCast(g.pixel.pixel_height));
     const width = @as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.pixel_height)) * ratio));
