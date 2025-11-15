@@ -42,12 +42,7 @@ export fn render_img(name: [*:0]const u8, len: usize) usize {
     const name_slice: []const u8 = name[0..len];
     var ret: usize = 0;
     render(name_slice) catch |err| {
-        const stdout_file = std.io.getStdOut().writer();
-        var bw = std.io.bufferedWriter(stdout_file);
-        const stdout = bw.writer();
-        stdout.print("Error occured: {any}\n", .{err}) catch {
-            return 1;
-        };
+        IMAGEVIEWER_LOG.err("Error occured: {any}\n", .{err});
         ret = 1;
     };
 
