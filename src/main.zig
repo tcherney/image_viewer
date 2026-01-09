@@ -19,6 +19,7 @@ pub const std_options: std.Options = .{
         .{ .scope = .texture, .level = .err },
         .{ .scope = .graphics, .level = .err },
         .{ .scope = .image_viewer, .level = .err },
+        .{ .scope = .pixel_renderer, .level = .info },
     },
 };
 
@@ -65,6 +66,7 @@ pub fn render(name: []const u8) Error!void {
     defer img.deinit();
     engine.set_wasm_terminal_size(150, 600);
     var g: Graphics = try Graphics.init(allocator, .pixel, ._2d, .color_true, .wasm);
+    g.pixel.sixel_renderer = true;
     const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
     const height = @as(u32, @intCast(g.pixel.pixel_height));
     const width = @as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.pixel_height)) * ratio));
