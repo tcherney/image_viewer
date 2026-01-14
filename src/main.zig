@@ -65,18 +65,18 @@ pub fn render(name: []const u8) Error!void {
     }
     defer img.deinit();
     engine.set_wasm_terminal_size(150, 600);
-    var g: Graphics = try Graphics.init(allocator, .pixel, ._2d, .color_true, if (builtin.os.tag == .emscripten or builtin.os.tag == .wasi) .wasm else .native);
+    var g: Graphics = try Graphics.init(allocator, .sixel, ._2d, .color_true, if (builtin.os.tag == .emscripten or builtin.os.tag == .wasi) .wasm else .native);
     g.pixel.sixel_renderer = true;
     //TODO have to think about how the image is scaled for sixel, we currently are making the image smaller than it needs to be with sixels
-    const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
-    const height = @as(u32, @intCast(g.pixel.pixel_height));
-    const width = @as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.pixel_height)) * ratio));
-    const pixels = try image.image_core.bilinear(allocator, img.data.items, img.width, img.height, width, height);
-    defer allocator.free(pixels);
+    //const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
+    const height = img.height; //@as(u32, @intCast(g.pixel.pixel_height));
+    const width = img.width; //@as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.pixel_height)) * ratio));
+    //const pixels = try image.image_core.bilinear(allocator, img.data.items, img.width, img.height, width, height);
+    //defer allocator.free(pixels);
     //g.pixel.first_render = false;
     IMAGEVIEWER_LOG.info("Rendering image of size {d}x{d} terminal size {d}x{d}\n", .{ width, height, g.pixel.pixel_width, g.pixel.pixel_height });
     g.pixel.set_bg(0, 0, 0, null);
-    try g.pixel.draw_pixel_buffer(pixels, width, height, .{ .x = 0, .y = 0, .width = width, .height = height }, .{ .x = 0, .y = 0, .width = width, .height = height }, null);
+    try g.pixel.draw_pixel_buffer(img.data.items, width, height, .{ .x = 0, .y = 0, .width = width, .height = height }, .{ .x = 0, .y = 0, .width = width, .height = height }, null);
     try g.pixel.flip(null, null);
     if (builtin.os.tag != .emscripten) {
         _ = try g.pixel.terminal.stdin.readByte();
