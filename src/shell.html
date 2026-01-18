@@ -1,42 +1,49 @@
 <!DOCTYPE html>
 <html lang="en-us" style="overflow: hidden">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>image_viewer</title>
-    <link rel="stylesheet" href="xterm/xterm.css" />
-    <script src="xterm/xterm.js"></script>
-    <style>
-      body {
-        padding: 0;
-        margin: 0;
-      }
-      .emscripten {
-        padding-right: 0;
-        margin-left: auto;
-        margin-right: auto;
-        display: block;
-      }
-      textarea.emscripten {
-        font-family: monospace;
-        width: 80%;
-        height: 100%;
-      }
-      div.emscripten {
-        text-align: center;
-      }
-      div.emscripten_border {
-        border: 1px solid black;
-        display: none;
-      }
-      /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
-      canvas.emscripten {
-        display: none;
-        border: 0px none;
-        background-color: black;
-      }
 
-      /* #output {
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>image_viewer</title>
+  <link rel="stylesheet" href="xterm/xterm.css" />
+  <script src="xterm/xterm.js"></script>
+  <script src="xterm/addon-image.js"></script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    .emscripten {
+      padding-right: 0;
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
+    }
+
+    textarea.emscripten {
+      font-family: monospace;
+      width: 80%;
+      height: 100%;
+    }
+
+    div.emscripten {
+      text-align: center;
+    }
+
+    div.emscripten_border {
+      border: 1px solid black;
+      display: none;
+    }
+
+    /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+    canvas.emscripten {
+      display: none;
+      border: 0px none;
+      background-color: black;
+    }
+
+    /* #output {
         width: 100%;
         margin: 0 auto;
         margin-top: 10px;
@@ -51,13 +58,13 @@
         outline: none;
       } */
 
-      /* #output-container {
+    /* #output-container {
         position: relative;
         width: 1350px;
         height: 607px;
       } */
 
-      /* #output {
+    /* #output {
         position: absolute;
         top: 0;
         left: 0;
@@ -65,7 +72,7 @@
         height: 100%;
       } */
 
-      /* #output-overlay {
+    /* #output-overlay {
         position: absolute;
         z-index: 9;
         top: 0;
@@ -74,74 +81,78 @@
         height: 100%;
       } */
 
-      .spinner {
-        height: 50px;
-        width: 50px;
-        margin: 0px auto;
-        -webkit-animation: rotation 0.8s linear infinite;
-        -moz-animation: rotation 0.8s linear infinite;
-        -o-animation: rotation 0.8s linear infinite;
-        animation: rotation 0.8s linear infinite;
-        border-left: 10px solid rgb(0, 150, 240);
-        border-right: 10px solid rgb(0, 150, 240);
-        border-bottom: 10px solid rgb(0, 150, 240);
-        border-top: 10px solid rgb(100, 0, 200);
-        border-radius: 100%;
-        background-color: rgb(200, 100, 250);
+    .spinner {
+      height: 50px;
+      width: 50px;
+      margin: 0px auto;
+      -webkit-animation: rotation 0.8s linear infinite;
+      -moz-animation: rotation 0.8s linear infinite;
+      -o-animation: rotation 0.8s linear infinite;
+      animation: rotation 0.8s linear infinite;
+      border-left: 10px solid rgb(0, 150, 240);
+      border-right: 10px solid rgb(0, 150, 240);
+      border-bottom: 10px solid rgb(0, 150, 240);
+      border-top: 10px solid rgb(100, 0, 200);
+      border-radius: 100%;
+      background-color: rgb(200, 100, 250);
+    }
+
+    @-webkit-keyframes rotation {
+      from {
+        -webkit-transform: rotate(0deg);
       }
-      @-webkit-keyframes rotation {
-        from {
-          -webkit-transform: rotate(0deg);
-        }
-        to {
-          -webkit-transform: rotate(360deg);
-        }
+
+      to {
+        -webkit-transform: rotate(360deg);
       }
-      @-moz-keyframes rotation {
-        from {
-          -moz-transform: rotate(0deg);
-        }
-        to {
-          -moz-transform: rotate(360deg);
-        }
+    }
+
+    @-moz-keyframes rotation {
+      from {
+        -moz-transform: rotate(0deg);
       }
-      @-o-keyframes rotation {
-        from {
-          -o-transform: rotate(0deg);
-        }
-        to {
-          -o-transform: rotate(360deg);
-        }
+
+      to {
+        -moz-transform: rotate(360deg);
       }
-      @keyframes rotation {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(360deg);
-        }
+    }
+
+    @-o-keyframes rotation {
+      from {
+        -o-transform: rotate(0deg);
       }
-    </style>
-  </head>
-  <body>
-    <figure style="overflow: visible" id="spinner">
-      <div class="spinner"></div>
-      <center style="margin-top: 0.5em"><strong>emscripten</strong></center>
-    </figure>
-    <div class="emscripten" id="status">Downloading...</div>
-    <div class="emscripten">
-      <progress value="0" max="100" id="progress" hidden="1"></progress>
-    </div>
-    <div class="emscripten_border">
-      <canvas
-        class="emscripten"
-        id="canvas"
-        oncontextmenu="event.preventDefault()"
-        tabindex="-1"
-      ></canvas>
-    </div>
-    <!-- <hr /> -->
-    <!-- <div class="emscripten">
+
+      to {
+        -o-transform: rotate(360deg);
+      }
+    }
+
+    @keyframes rotation {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <figure style="overflow: visible" id="spinner">
+    <div class="spinner"></div>
+    <center style="margin-top: 0.5em"><strong>emscripten</strong></center>
+  </figure>
+  <div class="emscripten" id="status">Downloading...</div>
+  <div class="emscripten">
+    <progress value="0" max="100" id="progress" hidden="1"></progress>
+  </div>
+  <div class="emscripten_border">
+    <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+  </div>
+  <!-- <hr /> -->
+  <!-- <div class="emscripten">
       <input type="checkbox" id="resize" />Resize canvas
       <input type="checkbox" id="pointerLock" checked />Lock/hide mouse pointer
       &nbsp;&nbsp;&nbsp;
@@ -153,166 +164,184 @@
       />
     </div> -->
 
-    <!-- <hr /> -->
-    <input type="file" id="file_in" onchange="load_file()" />Pick a jpg/png/bmp
-    image file to to view in the terminal
-    <div id="output-container">
-      <div id="output"></div>
-      <!-- <div id="output-overlay"></div> -->
-    </div>
-    <hr />
-    <script type="text/javascript">
-      var statusElement = document.getElementById("status");
-      var progressElement = document.getElementById("progress");
-      var spinnerElement = document.getElementById("spinner");
-      var term = new Terminal({
-        cols: 600,
-        rows: 150,
-        fontSize: 4,
-        scrollOnUserInput: false,
-      });
-      let reader = new FileReader();
-      let file = null;
-      function load_file() {
-        let files = document.getElementById("file_in").files;
-        file = files[0];
-        reader.addEventListener("loadend", img_view);
-        reader.readAsArrayBuffer(file);
-      }
-      function img_view(e) {
-        let result = reader.result;
-        console.log(result);
-        const uint8_view = new Uint8Array(result);
-        FS.writeFile(file.name, uint8_view);
-        term.clear();
-        Module.ccall(
-          "render_img",
-          "number",
-          ["string", "number"],
-          [file.name, file.name.length]
-        );
-        setTimeout(function () {
-          term.scrollToTop();
-        }, 1000);
-      }
-      term.open(document.getElementById("output"));
+  <!-- <hr /> -->
+  <input type="file" id="file_in" onchange="load_file()" />Pick a jpg/png/bmp
+  image file to to view in the terminal
+  <div id="output-container">
+    <div id="output"></div>
+    <!-- <div id="output-overlay"></div> -->
+  </div>
+  <hr />
+  <script type="text/javascript">
+    var statusElement = document.getElementById("status");
+    var progressElement = document.getElementById("progress");
+    var spinnerElement = document.getElementById("spinner");
+    var term = new Terminal({
+      cols: 600,
+      rows: 150,
+      fontSize: 4,
+      scrollOnUserInput: false,
+    });
+    let reader = new FileReader();
+    let file = null;
+    function load_file() {
+      let files = document.getElementById("file_in").files;
+      file = files[0];
+      reader.addEventListener("loadend", img_view);
+      reader.readAsArrayBuffer(file);
+    }
+    function img_view(e) {
+      let result = reader.result;
+      console.log(result);
+      const uint8_view = new Uint8Array(result);
+      FS.writeFile(file.name, uint8_view);
+      term.clear();
+      Module.ccall(
+        "render_img",
+        "number",
+        ["string", "number"],
+        [file.name, file.name.length]
+      );
+      setTimeout(function () {
+        term.scrollToTop();
+      }, 1000);
+    }
 
-      var Module = {
-        print: (function () {
-          return (...args) => {
-            var text = args.join("");
-            // These replacements are necessary if you render to raw HTML
-            //text = text.replace(/&/g, "&amp;");
-            //text = text.replace(/</g, "&lt;");
-            //text = text.replace(/>/g, "&gt;");
-            //text = text.replace('\n', '<br>', 'g');
-            //console.log(text);
+    term.open(document.getElementById("output"));
+    const ImageAddon = window.ImageAddon.ImageAddon;
+    const customSettings = {
+      enableSizeReports: true,
+      pixelLimit: 16777216,
+      sixelSupport: true,
+      sixelScrolling: true,
+      sixelPaletteLimit: 256,
+      sixelSizeLimit: 25000000,
+      storageLimit: 128,
+      showPlaceholder: true,
+      iipSupport: true,
+      iipSizeLimit: 20000000
+    };
 
-            term.write(text.replaceAll("\n", "\r\n"));
-            if (text.at(-1) != "\n") {
-              term.write("\r\n");
-            }
-            //element.scrollTop = element.scrollHeight; // focus on bottom
-          };
-        })(),
-        printErr: (function () {
-          return (...args) => {
-            var text = args.join("");
-            // These replacements are necessary if you render to raw HTML
-            //text = text.replace(/&/g, "&amp;");
-            //text = text.replace(/</g, "&lt;");
-            //text = text.replace(/>/g, "&gt;");
-            //text = text.replace('\n', '<br>', 'g');
-            console.log(text);
+    const imageAddon = new ImageAddon(customSettings);
+    term.loadAddon(imageAddon);
 
-            //term.write(text + "\r\n");
-            //element.scrollTop = element.scrollHeight; // focus on bottom
-          };
-        })(),
-        canvas: (() => {
-          var canvas = document.getElementById("canvas");
+    var Module = {
+      print: (function () {
+        return (...args) => {
+          var text = args.join("");
+          // These replacements are necessary if you render to raw HTML
+          //text = text.replace(/&/g, "&amp;");
+          //text = text.replace(/</g, "&lt;");
+          //text = text.replace(/>/g, "&gt;");
+          //text = text.replace('\n', '<br>', 'g');
+          //console.log(text);
 
-          // As a default initial behavior, pop up an alert when webgl context is lost. To make your
-          // application robust, you may want to override this behavior before shipping!
-          // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
-          canvas.addEventListener(
-            "webglcontextlost",
-            (e) => {
-              alert("WebGL context lost. You will need to reload the page.");
-              e.preventDefault();
-            },
-            false
-          );
-          canvas.addEventListener(
-            "keydown",
-            (e) => {
-              if (
-                [
-                  "Space",
-                  "ArrowUp",
-                  "ArrowDown",
-                  "ArrowLeft",
-                  "ArrowRight",
-                  "F1",
-                  "F3",
-                  "F5",
-                ].indexOf(e.code) > -1
-              ) {
-                e.preventDefault();
-              }
-            },
-            false
-          );
-          canvas.focus();
-
-          return canvas;
-        })(),
-        setStatus: (text) => {
-          if (!Module.setStatus.last)
-            Module.setStatus.last = { time: Date.now(), text: "" };
-          if (text === Module.setStatus.last.text) return;
-          var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-          var now = Date.now();
-          if (m && now - Module.setStatus.last.time < 30) return; // if this is a progress update, skip it if too soon
-          Module.setStatus.last.time = now;
-          Module.setStatus.last.text = text;
-          if (m) {
-            text = m[1];
-            progressElement.value = parseInt(m[2]) * 100;
-            progressElement.max = parseInt(m[4]) * 100;
-            progressElement.hidden = false;
-            spinnerElement.hidden = false;
-          } else {
-            progressElement.value = null;
-            progressElement.max = null;
-            progressElement.hidden = true;
-            if (!text) spinnerElement.hidden = true;
+          term.write(text.replaceAll("\n", "\r\n"));
+          if (text.at(-1) != "\n") {
+            term.write("\r\n");
           }
-          statusElement.innerHTML = text;
-        },
-        totalDependencies: 0,
-        monitorRunDependencies: (left) => {
-          this.totalDependencies = Math.max(this.totalDependencies, left);
-          Module.setStatus(
-            left
-              ? "Preparing... (" +
-                  (this.totalDependencies - left) +
-                  "/" +
-                  this.totalDependencies +
-                  ")"
-              : "All downloads complete."
-          );
-        },
-      };
-      Module.setStatus("Downloading...");
-      window.onerror = () => {
-        Module.setStatus("Exception thrown, see JavaScript console");
-        spinnerElement.style.display = "none";
-        Module.setStatus = (text) => {
-          if (text) console.error("[post-exception status] " + text);
+          //element.scrollTop = element.scrollHeight; // focus on bottom
         };
+      })(),
+      printErr: (function () {
+        return (...args) => {
+          var text = args.join("");
+          // These replacements are necessary if you render to raw HTML
+          //text = text.replace(/&/g, "&amp;");
+          //text = text.replace(/</g, "&lt;");
+          //text = text.replace(/>/g, "&gt;");
+          //text = text.replace('\n', '<br>', 'g');
+          console.log(text);
+
+          //term.write(text + "\r\n");
+          //element.scrollTop = element.scrollHeight; // focus on bottom
+        };
+      })(),
+      canvas: (() => {
+        var canvas = document.getElementById("canvas");
+
+        // As a default initial behavior, pop up an alert when webgl context is lost. To make your
+        // application robust, you may want to override this behavior before shipping!
+        // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+        canvas.addEventListener(
+          "webglcontextlost",
+          (e) => {
+            alert("WebGL context lost. You will need to reload the page.");
+            e.preventDefault();
+          },
+          false
+        );
+        canvas.addEventListener(
+          "keydown",
+          (e) => {
+            if (
+              [
+                "Space",
+                "ArrowUp",
+                "ArrowDown",
+                "ArrowLeft",
+                "ArrowRight",
+                "F1",
+                "F3",
+                "F5",
+              ].indexOf(e.code) > -1
+            ) {
+              e.preventDefault();
+            }
+          },
+          false
+        );
+        canvas.focus();
+
+        return canvas;
+      })(),
+      setStatus: (text) => {
+        if (!Module.setStatus.last)
+          Module.setStatus.last = { time: Date.now(), text: "" };
+        if (text === Module.setStatus.last.text) return;
+        var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+        var now = Date.now();
+        if (m && now - Module.setStatus.last.time < 30) return; // if this is a progress update, skip it if too soon
+        Module.setStatus.last.time = now;
+        Module.setStatus.last.text = text;
+        if (m) {
+          text = m[1];
+          progressElement.value = parseInt(m[2]) * 100;
+          progressElement.max = parseInt(m[4]) * 100;
+          progressElement.hidden = false;
+          spinnerElement.hidden = false;
+        } else {
+          progressElement.value = null;
+          progressElement.max = null;
+          progressElement.hidden = true;
+          if (!text) spinnerElement.hidden = true;
+        }
+        statusElement.innerHTML = text;
+      },
+      totalDependencies: 0,
+      monitorRunDependencies: (left) => {
+        this.totalDependencies = Math.max(this.totalDependencies, left);
+        Module.setStatus(
+          left
+            ? "Preparing... (" +
+            (this.totalDependencies - left) +
+            "/" +
+            this.totalDependencies +
+            ")"
+            : "All downloads complete."
+        );
+      },
+    };
+    Module.setStatus("Downloading...");
+    window.onerror = () => {
+      Module.setStatus("Exception thrown, see JavaScript console");
+      spinnerElement.style.display = "none";
+      Module.setStatus = (text) => {
+        if (text) console.error("[post-exception status] " + text);
       };
-    </script>
-    {{{ SCRIPT }}}
-  </body>
+    };
+  </script>
+  {{{ SCRIPT }}}
+</body>
+
 </html>

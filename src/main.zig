@@ -14,7 +14,7 @@ pub const std_options: std.Options = .{
     .logFn = myLogFn,
     .log_scope_levels = &[_]std.log.ScopeLevel{
         .{ .scope = .png_image, .level = .err },
-        .{ .scope = .jpeg_image, .level = .err },
+        .{ .scope = .jpeg_image, .level = .info },
         .{ .scope = .bmp_image, .level = .err },
         .{ .scope = .texture, .level = .err },
         .{ .scope = .graphics, .level = .err },
@@ -41,6 +41,7 @@ pub fn myLogFn(
 const IMAGEVIEWER_LOG = std.log.scoped(.image_viewer);
 
 export fn render_img(name: [*:0]const u8, len: usize) usize {
+    std.debug.print("Starting render\n", .{});
     const name_slice: []const u8 = name[0..len];
     var ret: usize = 0;
     render(name_slice) catch |err| {
@@ -52,6 +53,8 @@ export fn render_img(name: [*:0]const u8, len: usize) usize {
 }
 
 pub fn render(name: []const u8) Error!void {
+    //TODO have to hunt down issue with loading images on emscripten
+    std.debug.print("Loading image\n", .{});
     const extension: []const u8 = name[name.len - 3 ..];
     var img: Image = undefined;
     if (std.mem.eql(u8, extension, "jpg") or std.mem.eql(u8, name[name.len - 4 ..], "jpeg")) {
@@ -64,11 +67,14 @@ pub fn render(name: []const u8) Error!void {
         IMAGEVIEWER_LOG.err("Image must be .jpg/.png/.bmp\n", .{});
         return Error.BadFileExt;
     }
+    std.debug.print("Image loaded\n", .{});
     defer img.deinit();
     engine.set_wasm_terminal_size(150, 600);
     const sixel_mode = true;
     if (sixel_mode) {
+        std.debug.print("Using sixel mode\n", .{});
         var g: Graphics = try Graphics.init(allocator, .sixel, ._2d, .color_true, if (builtin.os.tag == .emscripten or builtin.os.tag == .wasi) .wasm else .native);
+        std.debug.print("Allocated graphics\n", .{});
         //const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
         const height = 45 * 6; //@as(u32, @intCast(g.pixel.pixel_height));
         const width = 68 * 6; //@as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.pixel_height)) * ratio));

@@ -87,6 +87,9 @@ pub fn Build(b: *std.Build, s: ?*std.Build.Step.Compile, m: ?*std.Build.Module, 
         const xterm_js = b.addInstallFileWithDir(b.path("src/xterm/xterm.js"), .{ .prefix = {} }, emccOutputXtermJS);
         emcc_command.step.dependOn(&xterm_css.step);
         emcc_command.step.dependOn(&xterm_js.step);
+        const emccOutputXtermJSImageAddon = b.pathJoin(&.{ emccOutputXtermDir, name, std.fs.path.sep_str, "xterm", std.fs.path.sep_str, "addon-image.js" });
+        const xterm_image_addon = b.addInstallFileWithDir(b.path("src/xterm/addon-image.js"), .{ .prefix = {} }, emccOutputXtermJSImageAddon);
+        emcc_command.step.dependOn(&xterm_image_addon.step);
         const emccOutputDirExampleWithFile = b.pathJoin(&.{ emccOutputDir, name, std.fs.path.sep_str, emccOutputFile });
         emcc_command.addArgs(&[_][]const u8{
             "-o",
