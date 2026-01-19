@@ -87,9 +87,9 @@ pub fn Build(b: *std.Build, s: ?*std.Build.Step.Compile, m: ?*std.Build.Module, 
         const xterm_js = b.addInstallFileWithDir(b.path("src/xterm/xterm.js"), .{ .prefix = {} }, emccOutputXtermJS);
         emcc_command.step.dependOn(&xterm_css.step);
         emcc_command.step.dependOn(&xterm_js.step);
-        const emccOutputXtermJSImageAddon = b.pathJoin(&.{ emccOutputXtermDir, name, std.fs.path.sep_str, "xterm", std.fs.path.sep_str, "addon-image.js" });
-        const xterm_image_addon = b.addInstallFileWithDir(b.path("src/xterm/addon-image.js"), .{ .prefix = {} }, emccOutputXtermJSImageAddon);
-        emcc_command.step.dependOn(&xterm_image_addon.step);
+        //const emccOutputXtermJSImageAddon = b.pathJoin(&.{ emccOutputXtermDir, name, std.fs.path.sep_str, "xterm", std.fs.path.sep_str, "addon-image.js" });
+        //const xterm_image_addon = b.addInstallFileWithDir(b.path("src/xterm/addon-image.js"), .{ .prefix = {} }, emccOutputXtermJSImageAddon);
+        //emcc_command.step.dependOn(&xterm_image_addon.step);
         const emccOutputDirExampleWithFile = b.pathJoin(&.{ emccOutputDir, name, std.fs.path.sep_str, emccOutputFile });
         emcc_command.addArgs(&[_][]const u8{
             "-o",
@@ -102,8 +102,16 @@ pub fn Build(b: *std.Build, s: ?*std.Build.Step.Compile, m: ?*std.Build.Module, 
             "-sASYNCIFY",
             "-sNO_EXIT_RUNTIME",
             "-sUSE_OFFSET_CONVERTER",
-            "-sINITIAL_MEMORY=167772160",
+            "-sINITIAL_MEMORY=2147483648",
+            //"-sMAXIMUM_MEMORY=2147483648",
+            //"-fsanitize=address",
+            "-fexceptions",
+            "-sAssertions",
+            "-sINITIAL_HEAP=0KB",
             "-sALLOW_MEMORY_GROWTH",
+            "-sEXCEPTION_STACK_TRACES=1",
+            "-sTOTAL_STACK=1400MB",
+            //"-sMEMORY64",
             "-O3",
             //"--emrun",
             "-sSINGLE_FILE",
