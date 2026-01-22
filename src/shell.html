@@ -209,20 +209,14 @@
 
     term.open(document.getElementById("output"));
     const ImageAddon = window.ImageAddon.ImageAddon;
-    const customSettings = {
-      enableSizeReports: true,
+
+    const imageAddon = new ImageAddon({
       pixelLimit: 16777216,
       sixelSupport: true,
       sixelScrolling: true,
-      sixelPaletteLimit: 256,
-      sixelSizeLimit: 25000000,
       storageLimit: 128,
       showPlaceholder: true,
-      iipSupport: true,
-      iipSizeLimit: 20000000
-    };
-
-    const imageAddon = new ImageAddon(customSettings);
+    });
     term.loadAddon(imageAddon);
 
     var Module = {
