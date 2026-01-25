@@ -14,7 +14,7 @@ pub const std_options: std.Options = .{
     .logFn = myLogFn,
     .log_scope_levels = &[_]std.log.ScopeLevel{
         .{ .scope = .png_image, .level = .err },
-        .{ .scope = .jpeg_image, .level = .info },
+        .{ .scope = .jpeg_image, .level = .err },
         .{ .scope = .bmp_image, .level = .err },
         .{ .scope = .texture, .level = .err },
         .{ .scope = .graphics, .level = .err },
@@ -73,7 +73,7 @@ pub fn render(name: []const u8) Error!void {
     const sixel_mode = true;
     if (sixel_mode) {
         std.debug.print("Using sixel mode\n", .{});
-        var g: Graphics = try Graphics.init(allocator, .sixel, ._2d, .color_true, if (builtin.os.tag == .emscripten or builtin.os.tag == .wasi) .wasm else .native);
+        var g: Graphics = try Graphics.init(allocator, .sixel, ._2d, .color_true, .multi);
         std.debug.print("Allocated graphics\n", .{});
         //const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
         const height = 45 * 6; //@as(u32, @intCast(g.pixel.pixel_height));
