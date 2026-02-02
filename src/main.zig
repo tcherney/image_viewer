@@ -73,11 +73,11 @@ pub fn render(name: []const u8) Error!void {
     const sixel_mode = true;
     if (sixel_mode) {
         std.debug.print("Using sixel mode\n", .{});
-        var g: Graphics = try Graphics.init(allocator, .sixel, ._2d, .color_true, .multi);
+        var g: Graphics = try Graphics.init(allocator, .sixel, ._2d, .color_true, .single);
         std.debug.print("Allocated graphics\n", .{});
-        //const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
-        const height = 45 * 6; //@as(u32, @intCast(g.pixel.pixel_height));
-        const width = 68 * 6; //@as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.pixel_height)) * ratio));
+        const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
+        const height = @as(u32, @intCast(g.pixel.pixel_height));
+        const width = @as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.pixel_height)) * ratio));
         const pixels = try image.image_core.bilinear(allocator, img.data.items, img.width, img.height, width, height);
         defer allocator.free(pixels);
         //g.pixel.first_render = false;
