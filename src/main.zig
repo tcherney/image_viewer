@@ -70,14 +70,16 @@ pub fn render(name: []const u8) Error!void {
     std.debug.print("Image loaded\n", .{});
     defer img.deinit();
     engine.set_wasm_terminal_size(150, 600);
-    const sixel_mode = true;
+    const sixel_mode = false;
     if (sixel_mode) {
         std.debug.print("Using sixel mode\n", .{});
         var g: Graphics = try Graphics.init(allocator, .sixel, ._2d, .color_true, .single);
         std.debug.print("Allocated graphics\n", .{});
         const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
-        const height = @as(u32, @intCast(g.pixel.pixel_height));
-        const width = @as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.pixel_height)) * ratio));
+        var height = @as(u32, @intCast(g.pixel.pixel_height));
+        var width = @as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.pixel_height)) * ratio));
+        width = 680;
+        height = 453;
         const pixels = try image.image_core.bilinear(allocator, img.data.items, img.width, img.height, width, height);
         defer allocator.free(pixels);
         //g.pixel.first_render = false;
@@ -90,7 +92,7 @@ pub fn render(name: []const u8) Error!void {
         }
         try g.deinit();
     } else {
-        var g: Graphics = try Graphics.init(allocator, .pixel, ._2d, .color_true, if (builtin.os.tag == .emscripten or builtin.os.tag == .wasi) .wasm else .native);
+        var g: Graphics = try Graphics.init(allocator, .pixel, ._2d, .color_true, if (builtin.os.tag == .emscripten or builtin.os.tag == .wasi) .single else .multi);
         const ratio = @as(f32, @floatFromInt(img.width)) / @as(f32, @floatFromInt(img.height));
         const height = @as(u32, @intCast(g.pixel.pixel_height));
         const width = @as(u32, @intFromFloat(@as(f32, @floatFromInt(g.pixel.pixel_height)) * ratio));
